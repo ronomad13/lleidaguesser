@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LleidaGuessr</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap');
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #13131a;
+  --border: #1e1e2e;
+  --gold: #f5c542;
+  --green: #3ddc84;
+  --red: #ff4757;
+  --blue: #4dabf7;
+  --text: #e8eaf0;
+  --muted: #6b6f80;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); }
+
+/* ── Layout ── */
+#app { width: 100%; height: 100vh; display: flex; flex-direction: column; }
+
+#topbar {
+  height: 52px; background: var(--surface); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; flex-shrink: 0; z-index: 100;
+}
+
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--gold); }
+.logo span { color: var(--text); }
+
+#score-display {
+  display: flex; gap: 24px; font-family: 'DM Sans', sans-serif;
+}
+.score-item { text-align: center; }
+.score-val { font-size: 18px; font-weight: 700; color: var(--gold); }
+.score-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+#round-indicator {
+  font-size: 12px; color: var(--muted);
+  font-weight: 500;
+}
+
+/* ── Game area ── */
+#game-area {
+  flex: 1; display: flex; position: relative; overflow: hidden;
+}
+
+/* ── Street View panel ── */
+#sv-panel {
+  flex: 1; position: relative; background: #000;
+}
+
+#sv-frame {
+  width: 100%; height: 100%; border: none;
+}
+
+#sv-loading {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; background: var(--bg); z-index: 10;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px; height: 40px; border: 3px solid var(--border);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#sv-hint {
+  position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 6px 16px; font-size: 12px; color: var(--muted);
+  white-space: nowrap; z-index: 5;
+  transition: opacity 0.5s;
+}
+
+/* ── Map panel ── */
+#map-panel {
+  width: 340px; flex-shrink: 0; display: flex; flex-direction: column;
+  border-left: 1px solid var(--border); background: var(--surface);
+}
+
+#map-instructions {
+  padding: 14px 16px 10px; font-size: 13px; color: var(--muted); line-height: 1.5;
+  border-bottom: 1px solid var(--border);
+}
+#map-instructions strong { color: var(--text); }
+
+#map { flex: 1; }
+
+#guess-btn {
+  margin: 12px; border: none; border-radius: 8px; padding: 14px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px;
+  background: var(--gold); color: #000; cursor: pointer;
+  transition: all 0.15s; opacity: 0.4; pointer-events: none;
+}
+#guess-btn.ready { opacity: 1; pointer-events: all; }
+#guess-btn.ready:hover { background: #ffd44d; transform: translateY(-1px); }
+
+/* ── Result overlay ── */
+#result-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(4px); z-index: 200;
+  display: none; align-items: center; justify-content: center;
+}
+#result-overlay.show { display: flex; }
+
+#result-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 32px; width: 480px; max-width: 90vw;
+  text-align: center; animation: popIn 0.3s ease;
+}
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+#result-distance {
+  font-family: 'Bebas Neue', sans-serif; font-size: 64px; line-height: 1;
+  color: var(--gold); margin-bottom: 4px;
+}
+#result-label { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+#result-points {
+  font-family: 'Bebas Neue', sans-serif; font-size: 36px;
+  color: var(--green); margin-bottom: 24px;
+}
+
+#result-map { width: 100%; height: 200px; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+
+#next-btn {
+  border: none; border-radius: 8px; padding: 14px 32px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px;
+  background: var(--gold); color: #000; cursor: pointer;
+  transition: all 0.15s;
+}
+#next-btn:hover { background: #ffd44d; }
+
+/* ── Final screen ── */
+#final-screen {
+  position: absolute; inset: 0; background: var(--bg);
+  z-index: 300; display: none; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  text-align: center; padding: 32px;
+}
+#final-screen.show { display: flex; }
+#final-title { font-family: 'Bebas Neue', sans-serif; font-size: 72px; color: var(--gold); line-height: 1; }
+#final-score { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--text); }
+#final-sub { font-size: 14px; color: var(--muted); max-width: 400px; }
+#play-again-btn {
+  border: none; border-radius: 8px; padding: 16px 40px; margin-top: 8px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 2px;
+  background: var(--gold); color: #000; cursor: pointer;
+}
+
+/* ── Progress bar ── */
+#progress-bar {
+  height: 3px; background: var(--border); flex-shrink: 0;
+}
+#progress-fill {
+  height: 100%; background: var(--gold);
+  transition: width 0.4s ease; width: 0%;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  #game-area { flex-direction: column; }
+  #map-panel { width: 100%; height: 280px; border-left: none; border-top: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="logo">Lleida<span>Guessr</span></div>
+    <div id="round-indicator">Ronda 1 / 5</div>
+    <div id="score-display">
+      <div class="score-item">
+        <div class="score-val" id="total-score">0</div>
+        <div class="score-label">Punts</div>
+      </div>
+      <div class="score-item">
+        <div class="score-val" id="best-score">—</div>
+        <div class="score-label">Millor</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+
+  <div id="game-area">
+    <!-- Street View -->
+    <div id="sv-panel">
+      <div id="sv-loading">
+        <div class="spinner"></div>
+        <div style="color:var(--muted);font-size:13px">Carregant vista…</div>
+      </div>
+      <iframe id="sv-frame" allowfullscreen></iframe>
+      <div id="sv-hint">🔄 Arrossega per rotar · No pots avançar</div>
+    </div>
+
+    <!-- Guess map -->
+    <div id="map-panel">
+      <div id="map-instructions">
+        <strong>On és aquesta imatge?</strong><br>
+        Toca al mapa per marcar la teva resposta
+      </div>
+      <div id="map"></div>
+      <button id="guess-btn" onclick="submitGuess()">CONFIRMAR →</button>
+    </div>
+  </div>
+
+  <!-- Result overlay -->
+  <div id="result-overlay">
+    <div id="result-card">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Distància</div>
+      <div id="result-distance">—</div>
+      <div id="result-label">metres de distància</div>
+      <div id="result-points">+0 pts</div>
+      <div id="result-map"></div>
+      <button id="next-btn" onclick="nextRound()">SEGÜENT RONDA →</button>
+    </div>
+  </div>
+
+  <!-- Final screen -->
+  <div id="final-screen">
+    <div id="final-title">Fi!</div>
+    <div id="final-score">0 punts</div>
+    <div id="final-sub">Has completat les 5 rondes de LleidaGuessr</div>
+    <button id="play-again-btn" onclick="startGame()">TORNAR A JUGAR</button>
+  </div>
+</div>
+
+<script>
+// ── Locations: coordenades reals de Lleida amb imatges de Mapillary ──────────
+// Cada lloc té lat/lng i una cerca per trobar imatges properes via Mapillary
+const LOCATIONS = [
+  { lat: 41.6176, lng: 0.6200, name: "Centre Lleida" },
+  { lat: 41.6155, lng: 0.6245, name: "La Seu Vella" },
+  { lat: 41.6190, lng: 0.6170, name: "Rambla Ferran" },
+  { lat: 41.6210, lng: 0.6230, name: "Cappont" },
+  { lat: 41.6140, lng: 0.6180, name: "Barri Antic" },
+  { lat: 41.6230, lng: 0.6150, name: "Universitat" },
+  { lat: 41.6160, lng: 0.6280, name: "Balàfia" },
+  { lat: 41.6095, lng: 0.6210, name: "Bordeta" },
+  { lat: 41.6270, lng: 0.6200, name: "Pardinyes" },
+  { lat: 41.6180, lng: 0.6120, name: "Magraners" },
+];
+
+const MAPILLARY_TOKEN = 'MLY|4381405525300710|8e8a1fe0bb4a4e87f6e1c3e0e9a3f2b1';
+const TOTAL_ROUNDS = 5;
+const MAX_POINTS = 5000;
+const MAX_DIST_M = 3000; // distància màxima considerada (Lleida és petita)
+
+let state = {
+  round: 0,
+  totalScore: 0,
+  bestScore: parseInt(localStorage.getItem('lleida_guessr_best') || '0'),
+  locations: [],
+  currentLocation: null,
+  guessMarker: null,
+  guessLatLng: null,
+  guessMap: null,
+  resultMap: null,
+};
+
+// ── Map setup ────────────────────────────────────────────────────────────────
+const guessMap = L.map('map', {
+  center: [41.617, 0.622],
+  zoom: 13,
+  zoomControl: true,
+});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(guessMap);
+
+guessMap.on('click', function(e) {
+  if (state.guessMarker) guessMap.removeLayer(state.guessMarker);
+  state.guessLatLng = e.latlng;
+  state.guessMarker = L.circleMarker(e.latlng, {
+    radius: 10, fillColor: '#f5c542', fillOpacity: 1,
+    color: '#fff', weight: 2
+  }).addTo(guessMap);
+  document.getElementById('guess-btn').classList.add('ready');
+});
+
+// ── Haversine ────────────────────────────────────────────────────────────────
+function haversineM(a, b) {
+  const R = 6371000, toRad = x => x * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat), dLon = toRad(b.lng - a.lng);
+  const s = Math.sin(dLat/2)**2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(s));
+}
+
+function calcPoints(distM) {
+  if (distM <= 50) return MAX_POINTS;
+  if (distM >= MAX_DIST_M) return 0;
+  return Math.round(MAX_POINTS * Math.exp(-distM / 800));
+}
+
+// ── Mapillary: busca imatge propera ─────────────────────────────────────────
+async function fetchNearbyImage(lat, lng) {
+  const delta = 0.003;
+  const bbox = `${lng-delta},${lat-delta},${lng+delta},${lat+delta}`;
+  const url = `https://graph.mapillary.com/images?access_token=${MAPILLARY_TOKEN}&fields=id,geometry,thumb_2048_url&bbox=${bbox}&limit=20`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.data && data.data.length > 0) {
+      const imgs = data.data.filter(i => i.thumb_2048_url);
+      if (imgs.length > 0) return imgs[Math.floor(Math.random() * imgs.length)];
+    }
+  } catch(e) {}
+  return null;
+}
+
+// ── Mapillary viewer embed ───────────────────────────────────────────────────
+function loadStreetView(imageId) {
+  const frame = document.getElementById('sv-frame');
+  // Usa l'embed oficial de Mapillary
+  frame.src = `https://www.mapillary.com/embed?image_key=${imageId}&style=photo`;
+  document.getElementById('sv-loading').style.display = 'flex';
+  frame.onload = () => {
+    document.getElementById('sv-loading').style.display = 'none';
+    // Amaga hint després de 4s
+    setTimeout(() => { document.getElementById('sv-hint').style.opacity = '0'; }, 4000);
+  };
+}
+
+// ── Game flow ────────────────────────────────────────────────────────────────
+async function startGame() {
+  document.getElementById('final-screen').classList.remove('show');
+  state.round = 0;
+  state.totalScore = 0;
+  state.bestScore = parseInt(localStorage.getItem('lleida_guessr_best') || '0');
+
+  // Barreja i selecciona 5 ubicacions
+  const shuffled = [...LOCATIONS].sort(() => Math.random() - 0.5);
+  state.locations = shuffled.slice(0, TOTAL_ROUNDS);
+
+  updateScoreDisplay();
+  await loadRound();
+}
+
+async function loadRound() {
+  state.currentLocation = state.locations[state.round];
+  state.guessLatLng = null;
+
+  // Reset UI
+  if (state.guessMarker) { guessMap.removeLayer(state.guessMarker); state.guessMarker = null; }
+  document.getElementById('guess-btn').classList.remove('ready');
+  document.getElementById('result-overlay').classList.remove('show');
+  document.getElementById('sv-hint').style.opacity = '1';
+  document.getElementById('sv-loading').style.display = 'flex';
+  document.getElementById('round-indicator').textContent = `Ronda ${state.round + 1} / ${TOTAL_ROUNDS}`;
+  document.getElementById('progress-fill').style.width = `${(state.round / TOTAL_ROUNDS) * 100}%`;
+
+  // Busca imatge Mapillary
+  const loc = state.currentLocation;
+  const img = await fetchNearbyImage(loc.lat, loc.lng);
+
+  if (img) {
+    state.currentImageCoords = {
+      lat: img.geometry.coordinates[1],
+      lng: img.geometry.coordinates[0]
+    };
+    loadStreetView(img.id);
+  } else {
+    // Fallback: mostra imatge estàtica de Mapillary
+    showFallbackImage(loc);
+  }
+}
+
+function showFallbackImage(loc) {
+  document.getElementById('sv-loading').style.display = 'none';
+  const frame = document.getElementById('sv-frame');
+  // Usa Static Street View de Mapillary com a fallback
+  frame.src = `https://www.mapillary.com/embed?lat=${loc.lat}&lng=${loc.lng}&z=17&style=photo`;
+  state.currentImageCoords = { lat: loc.lat, lng: loc.lng };
+}
+
+function submitGuess() {
+  if (!state.guessLatLng) return;
+
+  const actual = state.currentImageCoords || state.currentLocation;
+  const guess = { lat: state.guessLatLng.lat, lng: state.guessLatLng.lng };
+  const distM = Math.round(haversineM(actual, guess));
+  const points = calcPoints(distM);
+
+  state.totalScore += points;
+  updateScoreDisplay();
+  showResult(distM, points, actual, guess);
+}
+
+function showResult(distM, points, actual, guess) {
+  const distText = distM < 1000 ? `${distM}m` : `${(distM/1000).toFixed(1)}km`;
+  const unit = distM < 1000 ? 'metres' : 'km';
+
+  document.getElementById('result-distance').textContent = distM < 1000 ? distM : (distM/1000).toFixed(1);
+  document.getElementById('result-label').textContent = `${unit} de distància · ${state.currentLocation.name}`;
+  document.getElementById('result-points').textContent = `+${points} punts`;
+
+  // Result map
+  const resultMapEl = document.getElementById('result-map');
+  resultMapEl.innerHTML = '';
+  if (state.resultMap) { state.resultMap.remove(); state.resultMap = null; }
+
+  setTimeout(() => {
+    state.resultMap = L.map('result-map', { zoomControl: false, attributionControl: false });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(state.resultMap);
+
+    const actualLatLng = L.latLng(actual.lat, actual.lng);
+    const guessLatLng = L.latLng(guess.lat, guess.lng);
+
+    L.circleMarker(actualLatLng, { radius: 10, fillColor: '#3ddc84', fillOpacity: 1, color: '#fff', weight: 2 })
+      .bindTooltip('📍 Lloc real', { permanent: true, direction: 'top', offset: [0, -10] }).addTo(state.resultMap);
+    L.circleMarker(guessLatLng, { radius: 10, fillColor: '#f5c542', fillOpacity: 1, color: '#fff', weight: 2 })
+      .bindTooltip('🎯 La teva resposta', { permanent: true, direction: 'top', offset: [0, -10] }).addTo(state.resultMap);
+    L.polyline([actualLatLng, guessLatLng], { color: '#ff4757', weight: 2, dashArray: '6 4' }).addTo(state.resultMap);
+
+    const bounds = L.latLngBounds([actualLatLng, guessLatLng]).pad(0.3);
+    state.resultMap.fitBounds(bounds);
+  }, 100);
+
+  // Color del resultat
+  const col = points > 4000 ? '#3ddc84' : points > 2000 ? '#f5c542' : '#ff4757';
+  document.getElementById('result-distance').style.color = col;
+  document.getElementById('result-points').style.color = col;
+
+  const isLast = state.round >= TOTAL_ROUNDS - 1;
+  document.getElementById('next-btn').textContent = isLast ? 'VEURE RESULTAT FINAL →' : 'SEGÜENT RONDA →';
+  document.getElementById('result-overlay').classList.add('show');
+}
+
+function nextRound() {
+  state.round++;
+  if (state.round >= TOTAL_ROUNDS) {
+    showFinalScreen();
+  } else {
+    loadRound();
+  }
+}
+
+function showFinalScreen() {
+  document.getElementById('result-overlay').classList.remove('show');
+  document.getElementById('progress-fill').style.width = '100%';
+
+  const best = Math.max(state.totalScore, state.bestScore);
+  localStorage.setItem('lleida_guessr_best', best);
+
+  const pct = Math.round((state.totalScore / (MAX_POINTS * TOTAL_ROUNDS)) * 100);
+  let comment = pct >= 80 ? '🏆 Expert de Lleida!' : pct >= 50 ? '👏 Bon coneixedor!' : '📍 Segueix explorant!';
+
+  document.getElementById('final-score').textContent = `${state.totalScore.toLocaleString()} punts`;
+  document.getElementById('final-sub').textContent = `${comment} · Millor marca: ${best.toLocaleString()} pts`;
+  document.getElementById('final-screen').classList.add('show');
+  updateScoreDisplay();
+}
+
+function updateScoreDisplay() {
+  document.getElementById('total-score').textContent = state.totalScore.toLocaleString();
+  const best = parseInt(localStorage.getItem('lleida_guessr_best') || '0');
+  document.getElementById('best-score').textContent = best > 0 ? best.toLocaleString() : '—';
+}
+
+// ── Start ─────────────────────────────────────────────────────────────────────
+updateScoreDisplay();
+startGame();
+</script>
+</body>
+</html>
