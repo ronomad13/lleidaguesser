@@ -23,405 +23,432 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .score-item{text-align:center}
 .score-val{font-size:18px;font-weight:700;color:var(--gold)}
 .score-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-#round-badge{background:var(--border);border-radius:20px;padding:4px 14px;font-size:12px;color:var(--muted);font-weight:500}
+#round-indicator{font-size:12px;color:var(--muted);font-weight:500}
 #game-area{flex:1;display:flex;position:relative;overflow:hidden}
-#sv-panel{flex:1;position:relative;background:#000;display:flex;flex-direction:column}
-#sv-img-wrap{flex:1;position:relative;overflow:hidden;cursor:grab;user-select:none}
-#sv-img-wrap:active{cursor:grabbing}
-#sv-img{width:100%;height:100%;object-fit:cover;transition:none;pointer-events:none}
-#sv-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:10;gap:12px}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite}
+#sv-panel{flex:1;position:relative;background:#000}
+#sv-img{width:100%;height:100%;object-fit:cover;display:none}
+#sv-iframe{width:100%;height:100%;border:none;display:none}
+#sv-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);z-index:10;gap:16px}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-#sv-controls{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0}
-.sv-btn{background:var(--border);border:none;color:var(--text);border-radius:6px;padding:6px 14px;font-size:18px;cursor:pointer;transition:background 0.15s}
-.sv-btn:hover{background:#2a2a3e}
-#sv-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:11px;color:var(--muted);white-space:nowrap;z-index:5;transition:opacity 1s}
+#sv-hint{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:20px;padding:6px 16px;font-size:12px;color:var(--muted);white-space:nowrap;z-index:5;transition:opacity 0.5s}
+#sv-source{position:absolute;top:12px;left:12px;background:rgba(0,0,0,0.6);border-radius:8px;padding:4px 10px;font-size:11px;color:var(--muted);z-index:5}
 #map-panel{width:340px;flex-shrink:0;display:flex;flex-direction:column;border-left:1px solid var(--border);background:var(--surface)}
-#map-instructions{padding:12px 16px 8px;font-size:13px;color:var(--muted);line-height:1.5;border-bottom:1px solid var(--border)}
+#map-instructions{padding:14px 16px 10px;font-size:13px;color:var(--muted);line-height:1.5;border-bottom:1px solid var(--border)}
 #map-instructions strong{color:var(--text)}
 #map{flex:1}
-#guess-btn{margin:10px;border:none;border-radius:8px;padding:13px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;background:var(--gold);color:#000;cursor:pointer;transition:all 0.15s;opacity:0.35;pointer-events:none}
+#guess-btn{margin:12px;border:none;border-radius:8px;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;background:var(--gold);color:#000;cursor:pointer;transition:all .15s;opacity:.4;pointer-events:none}
 #guess-btn.ready{opacity:1;pointer-events:all}
 #guess-btn.ready:hover{background:#ffd44d;transform:translateY(-1px)}
-#result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
+#result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center}
 #result-overlay.show{display:flex}
-#result-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:460px;max-width:92vw;text-align:center;animation:popIn 0.3s ease}
-@keyframes popIn{from{transform:scale(0.85);opacity:0}to{transform:scale(1);opacity:1}}
-#result-distance{font-family:'Bebas Neue',sans-serif;font-size:60px;line-height:1;color:var(--gold);margin-bottom:2px}
-#result-label{font-size:12px;color:var(--muted);margin-bottom:16px}
-#result-points{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green);margin-bottom:20px}
-#result-map{width:100%;height:180px;border-radius:10px;overflow:hidden;margin-bottom:18px}
-#next-btn{border:none;border-radius:8px;padding:13px 28px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;background:var(--gold);color:#000;cursor:pointer;transition:all 0.15s}
+#result-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:480px;max-width:90vw;text-align:center;animation:popIn .3s ease}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+#result-distance{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;color:var(--gold);margin-bottom:4px}
+#result-label{font-size:13px;color:var(--muted);margin-bottom:20px}
+#result-points{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--green);margin-bottom:24px}
+#result-map{width:100%;height:200px;border-radius:10px;overflow:hidden;margin-bottom:20px}
+#next-btn{border:none;border-radius:8px;padding:14px 32px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;background:var(--gold);color:#000;cursor:pointer;transition:all .15s}
 #next-btn:hover{background:#ffd44d}
+#progress-bar{height:3px;background:var(--border);flex-shrink:0}
+#progress-fill{height:100%;background:var(--gold);transition:width .4s ease;width:0%}
+
 /* Admin panel */
-#admin-toggle{position:fixed;bottom:16px;right:16px;background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:50%;width:36px;height:36px;font-size:16px;cursor:pointer;z-index:500;display:flex;align-items:center;justify-content:center}
-#admin-panel{position:fixed;bottom:60px;right:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;width:300px;z-index:500;display:none}
-#admin-panel.show{display:block}
-#admin-panel h3{font-size:13px;color:var(--text);margin-bottom:10px;font-weight:700}
-#admin-panel input[type=text]{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:12px;margin-bottom:6px}
-#admin-panel textarea{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:11px;height:70px;resize:none;font-family:monospace}
-.admin-btn{background:var(--gold);color:#000;border:none;border-radius:6px;padding:7px 14px;font-weight:700;font-size:12px;cursor:pointer;width:100%;margin-top:4px}
-#custom-list{margin-top:10px;font-size:11px;color:var(--muted);max-height:120px;overflow-y:auto}
-.custom-item{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--border)}
-.custom-item button{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px}
-@media(max-width:700px){#game-area{flex-direction:column}#map-panel{width:100%;height:260px;border-left:none;border-top:1px solid var(--border)}}
+#admin-btn{position:fixed;bottom:16px;right:16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;color:var(--muted);cursor:pointer;z-index:500}
+#admin-panel{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:600;display:none;align-items:center;justify-content:center}
+#admin-panel.show{display:flex}
+#admin-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:520px;max-width:90vw;max-height:80vh;overflow-y:auto}
+#admin-card h2{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);margin-bottom:16px}
+.admin-form label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px}
+.admin-form input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 12px;color:var(--text);font-size:13px;margin-bottom:12px}
+.admin-form input:focus{outline:none;border-color:var(--gold)}
+#photos-list{margin-bottom:16px}
+.photo-item{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border-radius:6px;margin-bottom:6px;font-size:12px}
+.photo-item img{width:48px;height:36px;object-fit:cover;border-radius:4px}
+.photo-item .del{color:var(--red);cursor:pointer;margin-left:auto;font-size:16px}
+.admin-btns{display:flex;gap:8px}
+.admin-btns button{flex:1;border:none;border-radius:6px;padding:10px;font-family:'Bebas Neue',sans-serif;font-size:16px;cursor:pointer}
+.btn-save{background:var(--gold);color:#000}
+.btn-close{background:var(--border);color:var(--text)}
+
+#streak-badge{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--green);display:none}
+
+@media(max-width:700px){
+  #game-area{flex-direction:column}
+  #map-panel{width:100%;height:260px;border-left:none;border-top:1px solid var(--border)}
+}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="topbar">
     <div class="logo">Lleida<span>Guessr</span></div>
-    <div id="round-badge">Ronda 1</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div id="round-indicator">Ronda 1</div>
+      <div id="streak-badge">🔥 Ratxa: <span id="streak-num">0</span></div>
+    </div>
     <div id="score-display">
       <div class="score-item"><div class="score-val" id="total-score">0</div><div class="score-label">Punts</div></div>
       <div class="score-item"><div class="score-val" id="best-score">—</div><div class="score-label">Millor</div></div>
-      <div class="score-item"><div class="score-val" id="streak-display">0</div><div class="score-label">Ratxa</div></div>
+      <div class="score-item"><div class="score-val" id="avg-score">—</div><div class="score-label">Mitjana</div></div>
     </div>
   </div>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
   <div id="game-area">
     <div id="sv-panel">
-      <div id="sv-img-wrap">
-        <div id="sv-loading"><div class="spinner"></div><div style="color:var(--muted);font-size:12px">Carregant imatge…</div></div>
-        <img id="sv-img" src="" alt="Vista de Lleida" draggable="false"/>
-        <div id="sv-hint">🔄 Arrossega per rotar · 🔍 Pinça per zoom</div>
-      </div>
-      <div id="sv-controls">
-        <button class="sv-btn" onclick="rotateImg(-90)" title="Rotar esquerra">↺</button>
-        <button class="sv-btn" onclick="zoomImg(-0.2)" title="Allunyar">−</button>
-        <button class="sv-btn" onclick="resetView()" title="Reset">⊙</button>
-        <button class="sv-btn" onclick="zoomImg(0.2)" title="Apropar">+</button>
-        <button class="sv-btn" onclick="rotateImg(90)" title="Rotar dreta">↻</button>
-      </div>
+      <div id="sv-loading"><div class="spinner"></div><div style="color:var(--muted);font-size:13px">Carregant imatge…</div></div>
+      <img id="sv-img" alt="Lloc de Lleida"/>
+      <iframe id="sv-iframe" allowfullscreen></iframe>
+      <div id="sv-hint">🔄 Arrossega per RotaR · No pots avançaR</div>
+      <div id="sv-source"></div>
     </div>
     <div id="map-panel">
       <div id="map-instructions"><strong>On és aquesta imatge?</strong><br>Toca al mapa per marcar la teva resposta</div>
       <div id="map"></div>
-      <button id="guess-btn" onclick="submitGuess()">CONFIRMAR RESPOSTA →</button>
+      <button id="guess-btn" onclick="submitGuess()">CONFIRMAR →</button>
     </div>
   </div>
   <div id="result-overlay">
     <div id="result-card">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Distància al lloc real</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Distància</div>
       <div id="result-distance">—</div>
       <div id="result-label"></div>
       <div id="result-points"></div>
       <div id="result-map"></div>
-      <button id="next-btn" onclick="nextRound()">SEGÜENT →</button>
+      <button id="next-btn" onclick="nextRound()">SEGÜENT RONDA →</button>
     </div>
   </div>
 </div>
 
-<!-- Admin: afegir fotos pròpies -->
-<button id="admin-toggle" onclick="toggleAdmin()" title="Afegir fotos">⚙</button>
+<button id="admin-btn" onclick="toggleAdmin()">⚙ Afegir fotos</button>
+
 <div id="admin-panel">
-  <h3>📸 Afegir foto pròpia</h3>
-  <input type="text" id="admin-url" placeholder="URL de la imatge (imgur, flickr…)"/>
-  <input type="text" id="admin-lat" placeholder="Latitud (ex: 41.6176)"/>
-  <input type="text" id="admin-lng" placeholder="Longitud (ex: 0.6200)"/>
-  <input type="text" id="admin-name" placeholder="Nom del lloc (ex: Plaça Sant Joan)"/>
-  <button class="admin-btn" onclick="addCustomPhoto()">+ Afegir</button>
-  <div id="custom-list"></div>
-  <button class="admin-btn" style="background:var(--border);color:var(--text);margin-top:8px" onclick="clearCustom()">Esborrar totes les fotos pròpies</button>
+  <div id="admin-card">
+    <h2>📸 Afegir foto manual</h2>
+    <div class="admin-form">
+      <label>URL de la imatge (directa)</label>
+      <input type="url" id="input-url" placeholder="https://...jpg">
+      <label>Latitud del lloc</label>
+      <input type="number" id="input-lat" placeholder="41.6176" step="0.0001">
+      <label>Longitud del lloc</label>
+      <input type="number" id="input-lng" placeholder="0.6200" step="0.0001">
+      <label>Nom del lloc (opcional)</label>
+      <input type="text" id="input-name" placeholder="Ex: Plaça de la Paeria">
+    </div>
+    <div id="photos-list"></div>
+    <div class="admin-btns">
+      <button class="admin-btns btn-save" style="background:var(--gold);color:#000;border:none;border-radius:6px;padding:10px;font-family:'Bebas Neue',sans-serif;font-size:16px;cursor:pointer;flex:1" onclick="addPhoto()">AFEGIR FOTO</button>
+      <button class="admin-btns btn-close" style="background:var(--border);color:var(--text);border:none;border-radius:6px;padding:10px;font-family:'Bebas Neue',sans-serif;font-size:16px;cursor:pointer;flex:1" onclick="toggleAdmin()">TANCAR</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const MAPILLARY_TOKEN = 'MLY|26203106146032390|7adb3b5719efc15c2226e5654931a933';
 const MAX_POINTS = 5000;
 const MAX_DIST_M = 3000;
+const STORAGE_KEY = 'lleidaguessr_photos';
+const STATS_KEY = 'lleidaguessr_stats';
 
-// Llocs base de Lleida — coordenades de zones interessants (no carreteres)
+// Ubicacions base per a Mapillary (places, barris, zones interessants)
 const BASE_LOCATIONS = [
   { lat:41.6155, lng:0.6245, name:"La Seu Vella" },
-  { lat:41.6190, lng:0.6168, name:"Rambla Ferran" },
-  { lat:41.6172, lng:0.6198, name:"Plaça Sant Joan" },
-  { lat:41.6180, lng:0.6215, name:"Barri Antic" },
+  { lat:41.6176, lng:0.6188, name:"Plaça de la Paeria" },
+  { lat:41.6190, lng:0.6170, name:"Rambla Ferran" },
   { lat:41.6210, lng:0.6230, name:"Cappont" },
-  { lat:41.6230, lng:0.6150, name:"Campus Universitat" },
-  { lat:41.6140, lng:0.6190, name:"Bordeta" },
+  { lat:41.6140, lng:0.6185, name:"Barri Antic" },
+  { lat:41.6230, lng:0.6148, name:"Universitat" },
+  { lat:41.6095, lng:0.6210, name:"Bordeta" },
   { lat:41.6270, lng:0.6200, name:"Pardinyes" },
-  { lat:41.6160, lng:0.6120, name:"Magraners" },
-  { lat:41.6195, lng:0.6255, name:"Balàfia" },
-  { lat:41.6145, lng:0.6230, name:"Instituts" },
-  { lat:41.6205, lng:0.6175, name:"Indústria" },
-  { lat:41.6165, lng:0.6170, name:"Centre Històric" },
-  { lat:41.6220, lng:0.6210, name:"Jardins" },
-  { lat:41.6135, lng:0.6165, name:"La Mariola" },
+  { lat:41.6180, lng:0.6120, name:"Magraners" },
+  { lat:41.6160, lng:0.6260, name:"Balàfia" },
+  { lat:41.6200, lng:0.6175, name:"Indústries" },
+  { lat:41.6130, lng:0.6230, name:"Secà de Sant Pere" },
+  { lat:41.6250, lng:0.6240, name:"Mariola" },
+  { lat:41.6165, lng:0.6200, name:"Centres Històric" },
+  { lat:41.6185, lng:0.6155, name:"Noguerola" },
 ];
 
 let state = {
   round: 0,
   totalScore: 0,
+  roundScores: [],
   streak: 0,
-  bestScore: parseInt(localStorage.getItem('lg_best')||'0'),
   guessMarker: null,
   guessLatLng: null,
   resultMap: null,
-  currentCoords: null,
-  currentName: '',
+  currentItem: null,
   usedIndices: [],
-  imgRotation: 0,
-  imgZoom: 1,
-  dragStart: null,
-  imgTranslateX: 0,
-  imgTranslateY: 0,
 };
 
-// ── Custom photos (localStorage) ─────────────────────────────────────────────
+// ── Stats ─────────────────────────────────────────────────────────────────────
+function loadStats() {
+  const s = JSON.parse(localStorage.getItem(STATS_KEY) || '{"best":0,"rounds":0,"totalPts":0}');
+  document.getElementById('best-score').textContent = s.best > 0 ? s.best.toLocaleString() : '—';
+  document.getElementById('avg-score').textContent = s.rounds > 0 ? Math.round(s.totalPts / s.rounds).toLocaleString() : '—';
+  return s;
+}
+
+function saveStats(points) {
+  const s = JSON.parse(localStorage.getItem(STATS_KEY) || '{"best":0,"rounds":0,"totalPts":0}');
+  s.rounds++;
+  s.totalPts += points;
+  s.best = Math.max(s.best, state.totalScore);
+  localStorage.setItem(STATS_KEY, JSON.stringify(s));
+  document.getElementById('best-score').textContent = s.best.toLocaleString();
+  document.getElementById('avg-score').textContent = Math.round(s.totalPts / s.rounds).toLocaleString();
+}
+
+// ── Custom photos ─────────────────────────────────────────────────────────────
 function getCustomPhotos() {
-  try { return JSON.parse(localStorage.getItem('lg_custom')||'[]'); } catch(e){ return []; }
-}
-function saveCustomPhotos(arr) { localStorage.setItem('lg_custom', JSON.stringify(arr)); }
-
-function addCustomPhoto() {
-  const url = document.getElementById('admin-url').value.trim();
-  const lat = parseFloat(document.getElementById('admin-lat').value);
-  const lng = parseFloat(document.getElementById('admin-lng').value);
-  const name = document.getElementById('admin-name').value.trim() || 'Lloc de Lleida';
-  if (!url || isNaN(lat) || isNaN(lng)) { alert('Cal URL, latitud i longitud vàlides'); return; }
-  const arr = getCustomPhotos();
-  arr.push({ url, lat, lng, name, custom: true });
-  saveCustomPhotos(arr);
-  document.getElementById('admin-url').value='';
-  document.getElementById('admin-lat').value='';
-  document.getElementById('admin-lng').value='';
-  document.getElementById('admin-name').value='';
-  renderCustomList();
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 }
 
-function clearCustom() {
-  if (confirm('Esborrar totes les fotos pròpies?')) { localStorage.removeItem('lg_custom'); renderCustomList(); }
+function saveCustomPhotos(photos) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(photos));
 }
 
-function renderCustomList() {
-  const arr = getCustomPhotos();
-  const el = document.getElementById('custom-list');
-  if (!arr.length) { el.innerHTML='<div style="color:var(--muted);font-size:11px">Cap foto afegida encara</div>'; return; }
-  el.innerHTML = arr.map((p,i) => `
-    <div class="custom-item">
-      <span>${p.name} (${p.lat.toFixed(4)}, ${p.lng.toFixed(4)})</span>
-      <button onclick="removeCustom(${i})">×</button>
+function renderPhotosList() {
+  const photos = getCustomPhotos();
+  const el = document.getElementById('photos-list');
+  if (!photos.length) { el.innerHTML = '<div style="color:var(--muted);font-size:12px;margin-bottom:12px">Cap foto afegida encara</div>'; return; }
+  el.innerHTML = photos.map((p, i) => `
+    <div class="photo-item">
+      <img src="${p.url}" onerror="this.style.display='none'">
+      <div><div style="color:var(--text)">${p.name || 'Sense nom'}</div><div style="color:var(--muted)">${p.lat}, ${p.lng}</div></div>
+      <span class="del" onclick="deletePhoto(${i})">✕</span>
     </div>`).join('');
 }
 
-function removeCustom(i) {
-  const arr = getCustomPhotos(); arr.splice(i,1); saveCustomPhotos(arr); renderCustomList();
+function addPhoto() {
+  const url = document.getElementById('input-url').value.trim();
+  const lat = parseFloat(document.getElementById('input-lat').value);
+  const lng = parseFloat(document.getElementById('input-lng').value);
+  const name = document.getElementById('input-name').value.trim();
+  if (!url || isNaN(lat) || isNaN(lng)) { alert('Cal URL, latitud i longitud'); return; }
+  const photos = getCustomPhotos();
+  photos.push({ url, lat, lng, name: name || 'Lloc de Lleida', type: 'custom' });
+  saveCustomPhotos(photos);
+  document.getElementById('input-url').value = '';
+  document.getElementById('input-lat').value = '';
+  document.getElementById('input-lng').value = '';
+  document.getElementById('input-name').value = '';
+  renderPhotosList();
+}
+
+function deletePhoto(i) {
+  const photos = getCustomPhotos();
+  photos.splice(i, 1);
+  saveCustomPhotos(photos);
+  renderPhotosList();
 }
 
 function toggleAdmin() {
   const p = document.getElementById('admin-panel');
   p.classList.toggle('show');
-  if (p.classList.contains('show')) renderCustomList();
+  if (p.classList.contains('show')) renderPhotosList();
 }
 
 // ── Map ───────────────────────────────────────────────────────────────────────
-const guessMap = L.map('map',{center:[41.617,0.622],zoom:13});
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(guessMap);
+const guessMap = L.map('map', { center:[41.617,0.622], zoom:13 });
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(guessMap);
 guessMap.on('click', function(e) {
   if (state.guessMarker) guessMap.removeLayer(state.guessMarker);
   state.guessLatLng = e.latlng;
-  state.guessMarker = L.circleMarker(e.latlng,{radius:10,fillColor:'#f5c542',fillOpacity:1,color:'#fff',weight:2}).addTo(guessMap);
+  state.guessMarker = L.circleMarker(e.latlng, { radius:10, fillColor:'#f5c542', fillOpacity:1, color:'#fff', weight:2 }).addTo(guessMap);
   document.getElementById('guess-btn').classList.add('ready');
 });
 
-// ── Image pan/zoom/rotate ─────────────────────────────────────────────────────
-function applyTransform() {
-  const img = document.getElementById('sv-img');
-  img.style.transform = `translate(${state.imgTranslateX}px,${state.imgTranslateY}px) scale(${state.imgZoom}) rotate(${state.imgRotation}deg)`;
-}
-function rotateImg(deg) { state.imgRotation = (state.imgRotation+deg)%360; applyTransform(); }
-function zoomImg(delta) { state.imgZoom = Math.max(0.5,Math.min(4, state.imgZoom+delta)); applyTransform(); }
-function resetView() { state.imgRotation=0; state.imgZoom=1; state.imgTranslateX=0; state.imgTranslateY=0; applyTransform(); }
-
-const wrap = document.getElementById('sv-img-wrap');
-wrap.addEventListener('mousedown', e => { state.dragStart={x:e.clientX,y:e.clientY}; });
-wrap.addEventListener('mousemove', e => {
-  if (!state.dragStart) return;
-  state.imgTranslateX += (e.clientX - state.dragStart.x)*0.8;
-  state.imgTranslateY += (e.clientY - state.dragStart.y)*0.8;
-  state.dragStart = {x:e.clientX, y:e.clientY};
-  applyTransform();
-});
-wrap.addEventListener('mouseup', () => state.dragStart=null);
-wrap.addEventListener('mouseleave', () => state.dragStart=null);
-wrap.addEventListener('wheel', e => { e.preventDefault(); zoomImg(e.deltaY>0?-0.15:0.15); },{passive:false});
-
-// Touch
-let lastTouchDist = null;
-wrap.addEventListener('touchstart', e => {
-  if (e.touches.length===1) state.dragStart={x:e.touches[0].clientX,y:e.touches[0].clientY};
-  if (e.touches.length===2) lastTouchDist = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-},{passive:true});
-wrap.addEventListener('touchmove', e => {
-  if (e.touches.length===1 && state.dragStart) {
-    state.imgTranslateX += (e.touches[0].clientX-state.dragStart.x)*0.8;
-    state.imgTranslateY += (e.touches[0].clientY-state.dragStart.y)*0.8;
-    state.dragStart = {x:e.touches[0].clientX,y:e.touches[0].clientY};
-    applyTransform();
-  }
-  if (e.touches.length===2 && lastTouchDist) {
-    const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    zoomImg((d-lastTouchDist)*0.005);
-    lastTouchDist=d;
-  }
-},{passive:true});
-wrap.addEventListener('touchend', ()=>{ state.dragStart=null; lastTouchDist=null; });
-
 // ── Haversine ─────────────────────────────────────────────────────────────────
-function haversineM(a,b) {
-  const R=6371000,tr=x=>x*Math.PI/180;
-  const dLat=tr(b.lat-a.lat),dLon=tr(b.lng-a.lng);
+function haversineM(a, b) {
+  const R=6371000, tr=x=>x*Math.PI/180;
+  const dLat=tr(b.lat-a.lat), dLon=tr(b.lng-a.lng);
   const s=Math.sin(dLat/2)**2+Math.cos(tr(a.lat))*Math.cos(tr(b.lat))*Math.sin(dLon/2)**2;
   return R*2*Math.asin(Math.sqrt(s));
 }
-function calcPoints(d) {
-  if(d<=30) return MAX_POINTS;
-  if(d>=MAX_DIST_M) return 0;
-  return Math.round(MAX_POINTS*Math.exp(-d/700));
+
+function calcPoints(distM) {
+  if (distM <= 30) return MAX_POINTS;
+  if (distM >= MAX_DIST_M) return 0;
+  return Math.round(MAX_POINTS * Math.exp(-distM / 700));
 }
 
-// ── Mapillary: busca imatge NO de carretera ───────────────────────────────────
+// ── Mapillary fetch (cerca imatges de façanes/places, no carreteres) ──────────
 async function fetchMapillaryImage(lat, lng) {
-  // Busca en un radi petit per trobar imatges de façanes/places
-  const deltas = [0.001, 0.002, 0.003];
-  for (const delta of deltas) {
-    const bbox = `${lng-delta},${lat-delta},${lng+delta},${lat+delta}`;
-    const url = `https://graph.mapillary.com/images?access_token=${MAPILLARY_TOKEN}&fields=id,geometry,thumb_2048_url,compass_angle,captured_at&bbox=${bbox}&limit=50`;
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-      if (!data.data || !data.data.length) continue;
-      // Filtra imatges amb URL vàlida
-      const valid = data.data.filter(i => i.thumb_2048_url);
-      if (!valid.length) continue;
-      // Selecciona aleatòriament entre les vàlides
-      const pick = valid[Math.floor(Math.random()*valid.length)];
-      return {
-        url: pick.thumb_2048_url,
-        lat: pick.geometry.coordinates[1],
-        lng: pick.geometry.coordinates[0],
-      };
-    } catch(e) { continue; }
-  }
-  return null;
+  // Cerca en radi petit per trobar imatges específiques del lloc
+  const delta = 0.0015;
+  const bbox = `${lng-delta},${lat-delta},${lng+delta},${lat+delta}`;
+  const url = `https://graph.mapillary.com/images?access_token=${MAPILLARY_TOKEN}&fields=id,geometry,thumb_2048_url,captured_at,creator&bbox=${bbox}&limit=50`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.data || !data.data.length) return null;
+
+    // Filtra imatges que tinguin miniatura i barreja
+    const valid = data.data.filter(i => i.thumb_2048_url);
+    if (!valid.length) return null;
+
+    // Pren una aleatòria (no sempre la primera = evitar sempre la carretera principal)
+    const pick = valid[Math.floor(Math.random() * Math.min(valid.length, 15))];
+    return {
+      url: pick.thumb_2048_url,
+      lat: pick.geometry.coordinates[1],
+      lng: pick.geometry.coordinates[0],
+      type: 'mapillary'
+    };
+  } catch(e) { return null; }
 }
 
-// ── Pick next location ────────────────────────────────────────────────────────
-async function pickLocation() {
+// ── Pick next item ────────────────────────────────────────────────────────────
+async function pickNextItem() {
   const custom = getCustomPhotos();
-  const all = [...custom, ...BASE_LOCATIONS];
 
-  // Evita repetir fins que s'hagin vist tots
-  if (state.usedIndices.length >= all.length) state.usedIndices = [];
-  const available = all.map((_,i)=>i).filter(i=>!state.usedIndices.includes(i));
-  const idx = available[Math.floor(Math.random()*available.length)];
-  state.usedIndices.push(idx);
-  const loc = all[idx];
+  // Barreja custom i mapillary: 40% custom si n'hi ha
+  const useCustom = custom.length > 0 && Math.random() < 0.4;
 
-  if (loc.custom) {
-    // Foto pròpia — URL directa
-    return { url: loc.url, lat: loc.lat, lng: loc.lng, name: loc.name };
-  } else {
-    // Mapillary
-    const img = await fetchMapillaryImage(loc.lat, loc.lng);
-    if (img) return { ...img, name: loc.name };
-    // Fallback: torna a intentar amb un altre lloc
-    return { url: `https://picsum.photos/seed/lleida${idx}/1200/800`, lat: loc.lat, lng: loc.lng, name: loc.name };
+  if (useCustom) {
+    const pick = custom[Math.floor(Math.random() * custom.length)];
+    return { ...pick, type: 'custom' };
   }
+
+  // Mapillary: escull ubicació aleatòria no repetida recentment
+  let available = BASE_LOCATIONS.filter((_, i) => !state.usedIndices.slice(-5).includes(i));
+  if (!available.length) available = BASE_LOCATIONS;
+  const idx = BASE_LOCATIONS.indexOf(available[Math.floor(Math.random() * available.length)]);
+  state.usedIndices.push(idx);
+  const loc = BASE_LOCATIONS[idx];
+
+  const img = await fetchMapillaryImage(loc.lat, loc.lng);
+  if (img) return { ...img, name: loc.name };
+
+  // Fallback: torna a intentar amb una altra ubicació
+  const fallbackLoc = BASE_LOCATIONS[Math.floor(Math.random() * BASE_LOCATIONS.length)];
+  const fallbackImg = await fetchMapillaryImage(fallbackLoc.lat, fallbackLoc.lng);
+  if (fallbackImg) return { ...fallbackImg, name: fallbackLoc.name };
+
+  return null;
 }
 
 // ── Load round ────────────────────────────────────────────────────────────────
 async function loadRound() {
-  resetView();
   state.guessLatLng = null;
-  if (state.guessMarker) { guessMap.removeLayer(state.guessMarker); state.guessMarker=null; }
+  if (state.guessMarker) { guessMap.removeLayer(state.guessMarker); state.guessMarker = null; }
   document.getElementById('guess-btn').classList.remove('ready');
   document.getElementById('result-overlay').classList.remove('show');
-  document.getElementById('sv-loading').style.display='flex';
-  document.getElementById('sv-hint').style.opacity='1';
-  document.getElementById('sv-img').src='';
-  document.getElementById('round-badge').textContent = `Ronda ${state.round+1}`;
+  document.getElementById('sv-hint').style.opacity = '1';
+  document.getElementById('sv-loading').style.display = 'flex';
+  document.getElementById('sv-img').style.display = 'none';
+  document.getElementById('sv-iframe').style.display = 'none';
+  document.getElementById('round-indicator').textContent = `Ronda ${state.round + 1}`;
 
-  const loc = await pickLocation();
-  state.currentCoords = { lat: loc.lat, lng: loc.lng };
-  state.currentName = loc.name;
+  const item = await pickNextItem();
 
-  const img = document.getElementById('sv-img');
-  img.onload = () => {
-    document.getElementById('sv-loading').style.display='none';
-    setTimeout(()=>{ document.getElementById('sv-hint').style.opacity='0'; }, 3000);
-  };
-  img.onerror = () => {
-    document.getElementById('sv-loading').style.display='none';
-    img.src = `https://picsum.photos/seed/${Date.now()}/1200/800`;
-  };
-  img.src = loc.url;
+  if (!item) {
+    document.getElementById('sv-loading').innerHTML = '<div style="color:var(--red);font-size:14px">No s\'han trobat imatges. Comprova connexió.</div>';
+    return;
+  }
+
+  state.currentItem = item;
+
+  if (item.type === 'custom') {
+    // Imatge estàtica pujada manualment
+    const img = document.getElementById('sv-img');
+    img.src = item.url;
+    img.onload = () => {
+      document.getElementById('sv-loading').style.display = 'none';
+      img.style.display = 'block';
+      document.getElementById('sv-source').textContent = '📸 Foto manual';
+      setTimeout(() => document.getElementById('sv-hint').style.opacity = '0', 3000);
+    };
+    img.onerror = () => {
+      document.getElementById('sv-loading').innerHTML = '<div style="color:var(--red);font-size:14px">Error carregant la imatge</div>';
+    };
+    document.getElementById('sv-hint').textContent = '📍 Identifica el lloc';
+  } else {
+    // Imatge de Mapillary
+    const img = document.getElementById('sv-img');
+    img.src = item.url;
+    img.onload = () => {
+      document.getElementById('sv-loading').style.display = 'none';
+      img.style.display = 'block';
+      document.getElementById('sv-source').textContent = '🗺 Mapillary · ' + (item.name || '');
+      setTimeout(() => document.getElementById('sv-hint').style.opacity = '0', 3000);
+    };
+    img.onerror = () => loadRound(); // reintenta si falla
+    document.getElementById('sv-hint').textContent = '📍 On és aquesta imatge?';
+  }
 }
 
 // ── Submit guess ──────────────────────────────────────────────────────────────
 function submitGuess() {
-  if (!state.guessLatLng) return;
-  const actual = state.currentCoords;
+  if (!state.guessLatLng || !state.currentItem) return;
+  const actual = { lat: state.currentItem.lat, lng: state.currentItem.lng };
   const guess = { lat: state.guessLatLng.lat, lng: state.guessLatLng.lng };
   const distM = Math.round(haversineM(actual, guess));
   const points = calcPoints(distM);
 
   state.totalScore += points;
-  state.round++;
-  if (points > 3000) state.streak++; else state.streak = 0;
-  if (state.totalScore > state.bestScore) {
-    state.bestScore = state.totalScore;
-    localStorage.setItem('lg_best', state.bestScore);
+  state.roundScores.push(points);
+  state.streak = points >= 2000 ? state.streak + 1 : 0;
+
+  document.getElementById('total-score').textContent = state.totalScore.toLocaleString();
+  if (state.streak >= 2) {
+    document.getElementById('streak-badge').style.display = 'block';
+    document.getElementById('streak-num').textContent = state.streak;
+  } else {
+    document.getElementById('streak-badge').style.display = 'none';
   }
 
-  updateUI();
-  showResult(distM, points, actual, guess);
-}
+  // Actualitza barra de progrés (últimes 10 rondes)
+  const recentAvg = state.roundScores.slice(-10).reduce((a,b)=>a+b,0) / Math.min(state.roundScores.length, 10);
+  document.getElementById('progress-fill').style.width = `${(recentAvg / MAX_POINTS) * 100}%`;
 
-function updateUI() {
-  document.getElementById('total-score').textContent = state.totalScore.toLocaleString();
-  document.getElementById('best-score').textContent = state.bestScore > 0 ? state.bestScore.toLocaleString() : '—';
-  document.getElementById('streak-display').textContent = state.streak;
+  saveStats(points);
+  showResult(distM, points, actual, guess);
 }
 
 // ── Show result ───────────────────────────────────────────────────────────────
 function showResult(distM, points, actual, guess) {
   const isClose = distM < 100;
   const distText = distM < 1000 ? `${distM}` : `${(distM/1000).toFixed(1)}`;
-  const unit = distM < 1000 ? 'metres' : 'km';
-  const col = points > 4000 ? '#3ddc84' : points > 2000 ? '#f5c542' : '#ff4757';
+  const unit = distM < 1000 ? 'metres de distància' : 'km de distància';
 
-  document.getElementById('result-distance').textContent = distText;
+  document.getElementById('result-distance').textContent = distText + (distM >= 1000 ? ' km' : ' m');
+  document.getElementById('result-label').textContent = `${unit} · ${state.currentItem.name || ''}`;
+  document.getElementById('result-points').textContent = `+${points.toLocaleString()} pts`;
+
+  const col = points > 4000 ? '#3ddc84' : points > 2000 ? '#f5c542' : '#ff4757';
   document.getElementById('result-distance').style.color = col;
-  document.getElementById('result-label').textContent = `${unit} de distància · ${state.currentName}`;
-  document.getElementById('result-points').textContent = `+${points.toLocaleString()} punts ${isClose ? '🎯 Perfecte!' : points > 3000 ? '👏' : points > 1000 ? '🙂' : '😅'}`;
   document.getElementById('result-points').style.color = col;
 
-  // Result map
-  document.getElementById('result-map').innerHTML='';
-  if (state.resultMap) { state.resultMap.remove(); state.resultMap=null; }
+  // Mapa resultat
+  document.getElementById('result-map').innerHTML = '';
+  if (state.resultMap) { state.resultMap.remove(); state.resultMap = null; }
   setTimeout(() => {
-    state.resultMap = L.map('result-map',{zoomControl:false,attributionControl:false});
+    state.resultMap = L.map('result-map', { zoomControl:false, attributionControl:false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(state.resultMap);
     const aLL = L.latLng(actual.lat, actual.lng);
     const gLL = L.latLng(guess.lat, guess.lng);
-    L.circleMarker(aLL,{radius:10,fillColor:'#3ddc84',fillOpacity:1,color:'#fff',weight:2})
-      .bindTooltip('📍 Lloc real',{permanent:true,direction:'top',offset:[0,-10]}).addTo(state.resultMap);
-    L.circleMarker(gLL,{radius:10,fillColor:'#f5c542',fillOpacity:1,color:'#fff',weight:2})
-      .bindTooltip('🎯 Tu',{permanent:true,direction:'top',offset:[0,-10]}).addTo(state.resultMap);
-    L.polyline([aLL,gLL],{color:'#ff4757',weight:2,dashArray:'6 4'}).addTo(state.resultMap);
-    state.resultMap.fitBounds(L.latLngBounds([aLL,gLL]).pad(0.35));
-  },100);
+    L.circleMarker(aLL, { radius:10, fillColor:'#3ddc84', fillOpacity:1, color:'#fff', weight:2 })
+      .bindTooltip('📍 Lloc real', { permanent:true, direction:'top', offset:[0,-10] }).addTo(state.resultMap);
+    L.circleMarker(gLL, { radius:10, fillColor:'#f5c542', fillOpacity:1, color:'#fff', weight:2 })
+      .bindTooltip('🎯 La teva', { permanent:true, direction:'top', offset:[0,-10] }).addTo(state.resultMap);
+    L.polyline([aLL, gLL], { color:'#ff4757', weight:2, dashArray:'6 4' }).addTo(state.resultMap);
+    state.resultMap.fitBounds(L.latLngBounds([aLL, gLL]).pad(0.4));
+  }, 100);
 
-  document.getElementById('next-btn').textContent = 'SEGÜENT →';
+  document.getElementById('next-btn').textContent = 'SEGÜENT RONDA →';
   document.getElementById('result-overlay').classList.add('show');
 }
 
+// ── Next round ────────────────────────────────────────────────────────────────
 function nextRound() {
+  state.round++;
   loadRound();
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-updateUI();
+loadStats();
 loadRound();
 </script>
 </body>
